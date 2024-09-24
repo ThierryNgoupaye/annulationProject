@@ -3,58 +3,40 @@ import NavBar from "@/components/navbar";
 import Footer from "@/components/footer";
 import React, {useContext, useEffect, useState} from "react";
 import {UserContext} from "@/servicesAuth/authService";
-import axios from "axios";
 import Swallow from "sweetalert2";
-import Swal from "sweetalert2";
+import axiosInstance from "@/axios";
+
 
 
 export default function Coupons()
 {
 
-    const [utilisateur, setUser] = useState(null);
     const [coupons, setCoupons] = useState([]);
-
-    const { user} = useContext(UserContext);
+    const { userContext } = useContext(UserContext);
 
 
     useEffect(() => {
-        if (user && user.userId) {
-            fetchUserData(user.userId).then(r => {
+        if (userContext && userContext.userId) {
+            fetchCouponsUser(userContext.userId).then(r => {
             });
         }
-    }, [user]);
+    }, [userContext]);
 
-
-    const fetchUserData = async (userId) => {
-        try {
-            const response = await axios.get(`http://localhost:8000/api/getClient/${userId}`);
-            setUser(response.data[0]);
-        } catch (error) {
-            console.log('erreur lors du chargement des informations de l\'utilisateur', error);
-        }
-    };
-
-
-
-    useEffect(() => {
-        if (utilisateur) {
-            fetchCouponsUser(utilisateur.id_utilisateur).then(r => {});
-        }
-    }, [utilisateur]);
 
     const fetchCouponsUser = async (idUser)=>
 
     {
         try {
-            const response = await axios.get(`http://localhost:8000/api/getHouse/${idUser}`);
-            setCoupons(response.data);
+            const response = await axiosInstance.get(`/coupons/user/${idUser}`);
+            setCoupons(response.data.data);
+            console.log(response.data);
         } catch (error) {
             await Swallow.fire({
                 icon: 'error',
                 title: 'Erreur de chargements',
                 text: 'impossible d\'afficher les coupons, réessayer plutard',
             });
-            console.error('Error fetching trips:', error);
+            console.error('Erreur lors du chargement des coupons:', error);
         }
     }
 
@@ -65,10 +47,11 @@ export default function Coupons()
         Swallow.fire({
             title: 'Détails du coupon',
             html: `
-                <p><strong>ID du coupon:</strong> ${coupon.id_maison}</p>
-                <p><strong>Nom de l'agence </strong> ${coupon.lieu}</p>
-                <p><strong>Valeur:</strong> ${coupon.prix_maison} points</p>
-                <p><strong>Description du coupon</strong> ${coupon.description_maison}</p>
+                <p class="mb-2"><strong>ID du coupon:</strong> ${coupon.idCoupon}</p>
+                <p class="mb-2"><strong>Nom de l'agence </strong> ${coupon.nomAgence}</p>
+                <p class="mb-2"><strong>Valeur:</strong> ${coupon.valeur} points</p>
+                <p class="mb-2"><strong>Date de debut</strong> ${new Date(coupon.dateDebut).toLocaleDateString()}</p>
+                <p> <strong>Date de fin</strong> ${new Date(coupon.dateFin).toLocaleDateString()}</p>        
             `,
             icon: 'info',
             confirmButtonText: 'OK'
@@ -89,23 +72,32 @@ export default function Coupons()
                                             <thead>
                                             <tr className="bg-blue-100">
                                                 <th className="border-b border-gray-300 px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">#</th>
-                                                <th className="border-b border-gray-300 px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">ID du coupon</th>
-                                                <th className="border-b border-gray-300 px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Nom de l'agence</th>
+                                                {/*  <th className="border-b border-gray-300 px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">ID
+                                                    du coupon
+                                                </th> */}
+                                                <th className="border-b border-gray-300 px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Nom
+                                                    de l'agence
+                                                </th>
                                                 <th className="border-b border-gray-300 px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Valeur</th>
+                                                <th className="border-b border-gray-300 px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider"> Etat
+                                                </th>
                                                 <th className="border-b border-gray-300 px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Action</th>
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            {coupons.map((piece, index) => (
-                                                <tr key={piece.id} className={index % 2 === 1 ? 'bg-blue-50' : 'bg-white'}>
+                                            {coupons.map((coupon, index) => (
+                                                <tr key={coupon.idCoupon}
+                                                    className={index % 2 === 1 ? 'bg-blue-50' : 'bg-white'}>
                                                     <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">{index + 1}</td>
-                                                    <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">{piece.id_maison}</td>
-                                                    <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">{piece.lieu}</td>
-                                                    <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">{piece.prix_maison}</td>
-                                                    <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">
+                                                    {/* <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">{coupon.idCoupon}</td>*/}
+                                                    <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">{coupon.nomAgence}</td>
+                                                    <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">{coupon.valeur}</td>
+                                                    {coupon.state === '1' ?
+                                                        <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">Valide </td> : <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap"> Expiré</td>}
+                                                        <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">
                                                         <button
-                                                            onClick={() => showCouponDetails(piece)}
-                                                            className="bg-blue-400 hover:bg-blue-600 text-white py-1 px-3 rounded-md"
+                                                        onClick={() => showCouponDetails(coupon)}
+                                                    className="bg-blue-400 hover:bg-blue-600 text-white py-1 px-3 rounded-md"
                                                         >
                                                             Afficher en détails
                                                         </button>

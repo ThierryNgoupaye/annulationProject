@@ -2,51 +2,32 @@
 import React, { useContext, useState, useEffect } from "react";
 import Link from "next/link";
 import { UserContext } from "@/servicesAuth/authService";
-import axios from 'axios';
-import NavBar from "@/components/navbar";
+import NavBar from "@/components/navbarAgency";
 import Footer from "@/components/footer";
 import Swal from "sweetalert2";
+import axiosInstance from "@/axios";
 
 
 
 export default function AnnulationClientPage() {
 
     const [agencyTrips, setAgencyTrips] = useState([]);
-    const [agency, setAgency] = useState(null);
-    const {user, logout} = useContext(UserContext);
+    const {userContext} = useContext(UserContext);
 
 
     useEffect(() => {
-        if (user && user.userId) {
-            fetchAgencyData(user.userId).then(r => {
-            });
+        if (userContext && userContext.userId) {
+            fetchAgencyTrips(userContext.userId).then(r => {});
         }
-    }, [user]);
+    }, [userContext]);
 
-
-    const fetchAgencyData = async (userId) => {
-        try {
-            const response = await axios.get(`http://localhost:8000/api/getClient/${userId}`);
-            setAgency(response.data[0]);
-        } catch (error) {
-            console.log('erreur lors du chargement des informations de l\'agence', error);
-        }
-    };
-
-
-    useEffect(() => {
-        if (agency) {
-            console.log('Utilisateur disponible:', agency);
-            fetchAgencyTrips(agency.id_utilisateur).then(r => {});
-        }
-    }, [agency]);
 
 
     const fetchAgencyTrips = async (idUser) => {
         try {
-            const response = await axios.get(`http://localhost:8000/api/get/${idUser}`);
-            console.log('Réponse API pour les voyages :', response.data);
-            setAgencyTrips(response.data);
+            const response = await axiosInstance.get(`/voyages/agence/${idUser}`);
+            console.log('Réponse API pour les voyages :', response.data.data);
+            setAgencyTrips(response.data.data);
         } catch (error) {
             console.error('Error fetching trips:', error);
             await Swal.fire({
@@ -58,18 +39,6 @@ export default function AnnulationClientPage() {
     };
 
 
-
-    if (!user)
-    {
-        return (
-            <div>
-                <p className="text-center text-3xl font-bold text-red-600 ">Vous n'êtes pas connecté</p>
-                <Link className="text-xl mt-10" href="/login/LoginClient">Connectez vous pour continuer ... </Link>
-            </div>
-        );
-    }
-    else
-    {
         return (
             <>
                 <div className="flex flex-col min-h-screen">
@@ -84,7 +53,7 @@ export default function AnnulationClientPage() {
                                         <th className="border-b border-gray-300 px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">#</th>
                                         <th className="border-b border-gray-300 px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">ID du voyage</th>
                                         <th className="border-b border-gray-300 px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Date de Depart</th>
-                                        <th className="border-b border-gray-300 px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Nombre places réservables</th>
+                                        <th className="border-b border-gray-300 px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Nombre places</th>
                                         <th className="border-b border-gray-300 px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Nombre de réservations</th>
                                         <th className="border-b border-gray-300 px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Action</th>
                                     </tr>
@@ -93,12 +62,12 @@ export default function AnnulationClientPage() {
                                     {agencyTrips.map((trip, index) => (
                                         <tr key={trip.id} className={index % 2 === 1 ? 'bg-blue-50' : 'bg-white'}>
                                             <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">{index + 1}</td>
-                                            <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">{trip.id_piece}</td>
-                                            <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">{trip.nom_piece}</td>
-                                            <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">{trip.prix_piece}</td>
-                                            <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">{/*{trip.description_piece}*/} {index + 4}</td>
+                                            <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">{trip.idVoyage}</td>
+                                            <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">{new Date(trip.dateDebut).toLocaleDateString()}</td>
+                                            <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">{trip.nbrePlace}</td>
+                                            <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">{trip.nbreReservation}</td>
                                             <td className="border-b border-gray-300 px-6 py-4 whitespace-nowrap">
-                                                <Link href={`/AnnulationAgencePage/${trip.id_piece}`}>
+                                                <Link href={`/AnnulationAgencePage/Trip/${trip.idVoyage}`}>
                                                     <button
                                                         className="bg-red-400 hover:bg-red-600 text-white py-1 px-3 rounded-md"
                                                     >
@@ -117,5 +86,4 @@ export default function AnnulationClientPage() {
                 </div>
             </>
         );
-    }
 }

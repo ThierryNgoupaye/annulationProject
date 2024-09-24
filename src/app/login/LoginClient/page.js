@@ -33,17 +33,17 @@ console.log(loginData);
                 <div className="flex justify-center">
                     <p className="text-bold text-2xl mt-10">Login</p>
                 </div>
-                <form className="mt-10" onSubmit={handleSubmit}>
+                <form className="mt-10" onSubmit={handleSubmit} method ="post">
                     <label className="ml-10"
-                           htmlFor="username">Username:
+                           htmlFor="email">Email:
                     </label>
                     <input
                         className="ml-2 px-2 text-gray-600 mb-5 mt-2 border border-gray-300 rounded-lg h-[35px] w-[250px]"
                         type="text"
-                        name="username"
+                        name="email"
                         onChange={handleChange}
-                        value = {loginData.username || ""}
-                        placeholder="username"
+                        value = {loginData.email || ""}
+                        placeholder="email"
                         required/>
                     <br/>
                     <label className="ml-10 mr-5 "

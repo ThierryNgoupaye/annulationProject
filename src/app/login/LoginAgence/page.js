@@ -5,6 +5,7 @@ import {UserContext} from "@/servicesAuth/authService";
 
 
 
+
 export default function LoginAdmin()
 {
 
@@ -27,7 +28,6 @@ export default function LoginAdmin()
     };
 
 
-
     return (
         <div className="flex justify-center items-center h-screen bg-tertiary">
             <div className="bg-white h-[400px] w-[400px] border-2 border-blue-600 rounded-2xl">
@@ -41,10 +41,10 @@ export default function LoginAdmin()
                     <input
                         className="ml-2 px-2 text-gray-600 mb-5 mt-2 border border-gray-300 rounded-lg h-[35px] w-[250px]"
                         type="text"
-                        name="username"
+                        name="email"
                         onChange={handleChange}
-                        value = {loginAgencyData.username || ""}
-                        placeholder="username"
+                        value = {loginAgencyData.email || ""}
+                        placeholder="email"
                         required/>
                     <br/>
                     <label className="ml-10 mr-5 "

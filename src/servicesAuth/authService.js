@@ -1,28 +1,32 @@
 "use client";
 import { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
 import Swal from "sweetalert2";
+import axiosInstance from "@/axios";
+
+
 
 export const UserContext = createContext(null);
 
 export const UserProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
+
+    const [userContext, setUserContext] = useState(null);
+
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const userId = localStorage.getItem('userId');
             if (userId) {
-                setUser({ userId });
+                setUserContext({ userId });
             }
         }
     }, []);
 
     const login = async (loginData) => {
         try {
-            const response = await axios.post('http://localhost:8000/api/loginClient', loginData);
+            const response = await axiosInstance.post('/login/user', loginData);
             const data = response.data;
             localStorage.setItem('userId', data.userId);
-            setUser({ userId: data.userId });
+            setUserContext({ userId: data.userId });
             await Swal.fire({
                 icon: 'success',
                 title: 'Authentification réussie',
@@ -43,10 +47,10 @@ export const UserProvider = ({ children }) => {
 
     const loginAgency = async (loginAgencyData) => {
         try {
-            const response = await axios.post('http://localhost:8000/api/loginClient', loginAgencyData);
+            const response =  await axiosInstance.post('/login/agence', loginAgencyData);
             const data = response.data;
             localStorage.setItem('userId', data.userId);
-            setUser({ userId: data.userId });
+            setUserContext({ userId: data.userId });
             await Swal.fire({
                 icon: 'success',
                 title: 'Authentification réussie',
@@ -68,15 +72,14 @@ export const UserProvider = ({ children }) => {
 
     const logout = () => {
         localStorage.removeItem('userId');
-        setUser(null);
+        setUserContext(null);
         if (typeof window !== 'undefined') {
             window.location.href = '/';
         }
     };
 
-
     return (
-        <UserContext.Provider value={{ user, login, loginAgency, logout }}>
+        <UserContext.Provider value={{ userContext, login, loginAgency, logout}}>
             {children}
         </UserContext.Provider>
     );
